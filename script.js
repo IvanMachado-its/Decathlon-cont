@@ -15,16 +15,14 @@ document.getElementById('convertButton').addEventListener('click', function () {
         const worksheet = workbook.Sheets[firstSheetName];
         const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
+        const maxLengths = json[0].map((_, colIndex) => {
+            return Math.max(...json.map(row => (row[colIndex] || '').toString().length));
+        });
+
         const txtOutput = json.map((row, rowIndex) => {
-            if (rowIndex === 0) {
-                // Headers
-                return row.join('    ');
-            } else {
-                // Data rows
-                return row.map((cell, cellIndex) => {
-                    return cell.toString().padEnd(json[0][cellIndex].length + 4, ' ');
-                }).join('');
-            }
+            return row.map((cell, cellIndex) => {
+                return (cell || '').toString().padEnd(maxLengths[cellIndex] + 2, ' ');
+            }).join('');
         }).join('\n');
 
         const blob = new Blob([txtOutput], { type: 'text/plain' });
